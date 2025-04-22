@@ -3,14 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/nurendraB/spiderNetscan/internal/scanner"
 )
 
+var (
+	Version = "dev" // Default version, will be replaced during build
+)
+
 func main() {
-	// Print ASCII banner
+	// Print ASCII banner with version
 	printBanner()
 
 	// Define flags for the tool
@@ -20,9 +25,16 @@ func main() {
 	onlineFlag := flag.Bool("online", false, "Fetch CVE data from online sources")
 	apiKeyFlag := flag.String("api-key", "", "API key for online CVE sources")
 	updateFlag := flag.Bool("update", false, "Update the tool to the latest version")
+	versionFlag := flag.Bool("version", false, "Show version of the tool")
 
 	// Parse the flags
 	flag.Parse()
+
+	// Handle --version flag
+	if *versionFlag {
+		fmt.Printf("spiderNetscan version: %s\n", Version)
+		os.Exit(0)
+	}
 
 	// Handle --update flag
 	if *updateFlag {
@@ -71,9 +83,9 @@ func main() {
 	}
 }
 
-// printBanner prints the ASCII banner with tool information
+// printBanner prints the ASCII banner with tool information and version
 func printBanner() {
-	banner := `
+	banner := fmt.Sprintf(`
            _     _              __     _                       
  ___ _ __ (_) __| | ___ _ __ /\ \ \___| |_ ___  ___ __ _ _ __  
 / __| '_ \| |/ __| |/ _ \ '__/  \/ / _ \ __/ __|/ __/ _\ | '_ \ 
@@ -82,7 +94,9 @@ func printBanner() {
     |_|                                                        
 
                         Developed by: @nurendraB (spiderinshell)
-`
+                        
+                        Version: %s
+`, Version)
 	fmt.Println(banner)
 }
 
