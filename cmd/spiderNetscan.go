@@ -76,11 +76,16 @@ func main() {
 		}
 	}
 
-	// Proceed with scanning (port scanning or other operations can be added here)
+	// Proceed with port scanning
 	err := scanner.ScanPorts(subnet, ports)
 	if err != nil {
 		fmt.Println("Error scanning ports:", err)
+		return
 	}
+
+	// If no errors, report the successful scanning
+	fmt.Println("Port scan completed successfully.")
+
 }
 
 // printBanner prints the ASCII banner with tool information and version
