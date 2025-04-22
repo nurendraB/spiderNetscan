@@ -1,6 +1,11 @@
 BINARY_NAME=spiderNetscan
 MAIN_FILE=cmd/spiderNetscan.go
-VERSION=v1.0.1
+VERSION=$(shell git describe --tags --abbrev=0)  # Fetch latest Git tag for version
+
+# Fallback to v1.0.1 if no tags are found
+ifeq ($(VERSION),)
+  VERSION=v1.0.1
+endif
 
 build:
 	@echo "Building the binary (Version: $(VERSION))..."
@@ -17,11 +22,14 @@ clean:
 update:
 	@echo "Updating spiderNetscan from GitHub..."
 	git pull origin main
+	@echo "Fetching latest version from Git tags..."
+	$(eval VERSION=$(shell git describe --tags --abbrev=0))  # Update VERSION to latest tag
+	@echo "Updated version: $(VERSION)"
 
 help:
 	@echo "Makefile Commands:"
 	@echo "  build    - Build the spiderNetscan tool with version info"
 	@echo "  install  - Install the tool to /usr/local/bin"
 	@echo "  clean    - Remove the built binary"
-	@echo "  update   - Update the tool from GitHub"
+	@echo "  update   - Update the tool from GitHub and fetch the latest version"
 	@echo "  help     - Display this help text"

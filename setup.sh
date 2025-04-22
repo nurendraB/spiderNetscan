@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the version you want to build and install
-VERSION="v1.0.1" 
+VERSION="${VERSION:-v1.0.1}" # Allow passing VERSION via environment variable, fallback to v1.0.1
 
 # Ensure that the script is run from the project root directory
 if [ ! -f go.mod ]; then
@@ -15,7 +15,7 @@ go mod tidy
 
 # Build the tool with version injected
 echo "Building the tool (Version: $VERSION)..."
-make build VERSION="$VERSION"
+make build VERSION="$VERSION"  # Pass the version to Makefile
 
 # Check if the build was successful
 if [ $? -eq 0 ]; then
