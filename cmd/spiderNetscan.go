@@ -55,7 +55,14 @@ func main() {
 	ports := strings.Split(*portsFlag, ",")
 	subnet := *subnetFlag
 
-	// Fetch and check CVE data if needed
+	// Scan the ports and get the open ones
+	openPorts, err := scanner.ScanPorts(subnet, ports)
+	if err != nil {
+		fmt.Println("Error scanning ports:", err)
+		return
+	}
+
+	// If CVE flag is set, fetch and check CVE data
 	if *cveFlag {
 		if *onlineFlag {
 			if *apiKeyFlag == "" {
@@ -68,7 +75,7 @@ func main() {
 				return
 			}
 		} else {
-			err := scanner.CheckOfflineCVE(ports, "data/cve_data.json", subnet)
+			err := scanner.CheckOfflineCVE(openPorts, "data/cve_data.json", subnet)
 			if err != nil {
 				fmt.Println("Error checking CVE data:", err)
 				return
@@ -76,16 +83,12 @@ func main() {
 		}
 	}
 
-	// Proceed with port scanning (without repeating CVE info)
-	openPorts, err := scanner.ScanPorts(subnet, ports)
-	if err != nil {
-		fmt.Println("Error scanning ports:", err)
-		return
+	// Display open ports only once
+	if len(openPorts) > 0 {
+		fmt.Printf("Port scan completed successfully. Open ports: %v\n", openPorts)
+	} else {
+		fmt.Println("No open ports found.")
 	}
-
-	// If no errors, report the successful scanning and display the open ports
-	fmt.Println("Port scan completed successfully. Open ports:", openPorts)
-
 }
 
 // printBanner prints the ASCII banner with tool information and version

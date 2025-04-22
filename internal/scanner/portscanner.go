@@ -6,11 +6,10 @@ import (
 	"time"
 )
 
-// ScanPorts scans the given subnet and ports for open services
+// ScanPorts scans the given subnet and ports for open services and returns the open ports
 func ScanPorts(subnet string, ports []string) ([]string, error) {
-	openPorts := make([]string, 0)
-
-	// Here, you would implement actual port scanning logic, this is just a mock
+	openPorts := []string{}
+	// Here, you would implement actual port scanning logic
 	for _, port := range ports {
 		address := net.JoinHostPort(subnet, port)
 		_, err := net.DialTimeout("tcp", address, 5*time.Second)
@@ -21,6 +20,5 @@ func ScanPorts(subnet string, ports []string) ([]string, error) {
 			openPorts = append(openPorts, port)
 		}
 	}
-
 	return openPorts, nil
 }
