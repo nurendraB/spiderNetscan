@@ -124,8 +124,8 @@ func updateTool() error {
 		version = strings.TrimSpace(string(versionBytes))
 	}
 
-	// Rebuild the binary with updated version
-	cmdBuild := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X main.Version=%s", version), "-o", "spiderNetscan", "cmd/spiderNetscan.go")
+	// Rebuild the binary with the updated version
+	cmdBuild := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X 'main.Version=%s'", version), "-o", "spiderNetscan", "cmd/spiderNetscan.go")
 	cmdBuild.Stdout = os.Stdout
 	cmdBuild.Stderr = os.Stderr
 	if err := cmdBuild.Run(); err != nil {
