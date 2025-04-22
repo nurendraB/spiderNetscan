@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/nurendraB/spiderNetscan/internal/scanner"
@@ -88,6 +89,11 @@ func printBanner() {
 // updateTool updates the tool (can be implemented for git pull or other update logic)
 func updateTool() error {
 	fmt.Println("Updating spiderNetscan tool...")
-	// Implement git pull or other update logic here
+	cmd := exec.Command("git", "pull")
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to update the tool: %w", err)
+	}
+	fmt.Println("Update successful!")
 	return nil
 }
