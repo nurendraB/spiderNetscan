@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	Version = "dev" // Default version, will be replaced during build
+	Version = "v1.0.1" // Default version, will be replaced during build
 )
 
 func main() {
@@ -104,7 +104,7 @@ func printBanner() {
 func updateTool() error {
 	fmt.Println("Updating spiderNetscan tool...")
 
-	// Pull latest code
+	// Pull the latest code
 	cmd := exec.Command("git", "pull")
 	output, err := cmd.CombinedOutput()
 	fmt.Print(string(output))
@@ -125,7 +125,7 @@ func updateTool() error {
 	}
 
 	// Rebuild the binary with the updated version
-	cmdBuild := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X 'main.Version=%s'", version), "-o", "spiderNetscan", "cmd/spiderNetscan.go")
+	cmdBuild := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X main.Version=%s", version), "-o", "spiderNetscan", "cmd/spiderNetscan.go")
 	cmdBuild.Stdout = os.Stdout
 	cmdBuild.Stderr = os.Stderr
 	if err := cmdBuild.Run(); err != nil {
