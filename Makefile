@@ -4,7 +4,7 @@ VERSION=$(shell git describe --tags --abbrev=0)  # Fetch latest Git tag for vers
 
 # Fallback to v1.0.1 if no tags are found
 ifeq ($(VERSION),)
-  VERSION=v1.0.1
+  VERSION=v1.0.2
 endif
 
 build:

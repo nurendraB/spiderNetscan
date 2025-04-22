@@ -46,14 +46,27 @@ func CheckOfflineCVE(ports []string, filePath, subnet string) error {
 	return nil
 }
 
-// FetchOnlineCVEData fetches CVE data from an online source (like NVD)
-func FetchOnlineCVEData(apiKey string, ports []string, subnet string) error {
-	// Example of using the NVD API (replace with a real URL)
-	url := fmt.Sprintf("https://api.nvd.nist.gov/vuln/search?apiKey=%s&cpeName=*", apiKey)
+// FetchOnlineCVEData fetches CVE data from either NVD or MITRE
+func FetchOnlineCVEData(source, apiKey string, ports []string, subnet string) error {
+	switch source {
+	case "nvd":
+		// Fetch from NVD
+		url := fmt.Sprintf("https://api.nvd.nist.gov/vuln/search?apiKey=%s&cpeName=*", apiKey)
+		return fetchCVEFromURL(url, ports, subnet)
+	case "mitre":
+		// Fetch from MITRE
+		url := fmt.Sprintf("https://cve.mitre.org/api/cve-search?apiKey=%s", apiKey)
+		return fetchCVEFromURL(url, ports, subnet)
+	default:
+		return fmt.Errorf("unsupported CVE source: %s", source)
+	}
+}
 
+// fetchCVEFromURL fetches CVE data from a given URL
+func fetchCVEFromURL(url string, ports []string, subnet string) error {
 	resp, err := http.Get(url)
 	if err != nil {
-		return fmt.Errorf("failed to fetch CVE data from NVD: %w", err)
+		return fmt.Errorf("failed to fetch CVE data from URL: %w", err)
 	}
 	defer resp.Body.Close()
 

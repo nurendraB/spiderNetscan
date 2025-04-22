@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the version you want to build and install
-VERSION="${VERSION:-v1.0.1}" # Allow passing VERSION via environment variable, fallback to v1.0.1
+VERSION="${VERSION:-v1.0.2}" # Allow passing VERSION via environment variable, fallback to v1.0.1
 
 # Ensure that the script is run from the project root directory
 if [ ! -f go.mod ]; then

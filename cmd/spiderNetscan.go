@@ -24,6 +24,7 @@ func main() {
 	cveFlag := flag.Bool("cve", false, "Check CVEs for open ports")
 	onlineFlag := flag.Bool("online", false, "Fetch CVE data from online sources")
 	apiKeyFlag := flag.String("api-key", "", "API key for online CVE sources")
+	sourceFlag := flag.String("source", "nvd", "CVE data source (nvd or mitre)")
 	updateFlag := flag.Bool("update", false, "Update the tool to the latest version")
 	versionFlag := flag.Bool("version", false, "Show version of the tool")
 
@@ -69,12 +70,14 @@ func main() {
 				fmt.Println("Error: API key is required for online CVE check.")
 				return
 			}
-			err := scanner.FetchOnlineCVEData(*apiKeyFlag, ports, subnet)
+			// Fetch and check CVE data from the specified online source
+			err := scanner.FetchOnlineCVEData(*sourceFlag, *apiKeyFlag, ports, subnet)
 			if err != nil {
 				fmt.Println("Error fetching CVE data:", err)
 				return
 			}
 		} else {
+			// Check CVE data offline from local JSON file
 			err := scanner.CheckOfflineCVE(openPorts, "data/cve_data.json", subnet)
 			if err != nil {
 				fmt.Println("Error checking CVE data:", err)
