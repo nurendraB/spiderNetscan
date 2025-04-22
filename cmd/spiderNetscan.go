@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	Version = "dev" // Default version, will be replaced during build
+	Version = "latest" // Default version, will be replaced during build
 )
 
 func main() {
@@ -104,6 +104,11 @@ func printBanner() {
 func updateTool() error {
 	fmt.Println("Updating spiderNetscan tool...")
 
+	// Check if git is installed
+	if _, err := exec.LookPath("git"); err != nil {
+		return fmt.Errorf("git is not installed, please install git and try again")
+	}
+
 	// Pull the latest code
 	cmd := exec.Command("git", "pull")
 	output, err := cmd.CombinedOutput()
@@ -119,7 +124,7 @@ func updateTool() error {
 
 	// Get the latest Git tag as version (fallback to "latest" if no tag exists)
 	versionBytes, err := exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
-	version := "dev" // Default to "dev" if no tags exist
+	version := "latest" // Default to "latest" if no tags exist
 	if err == nil {
 		version = strings.TrimSpace(string(versionBytes))
 	}
