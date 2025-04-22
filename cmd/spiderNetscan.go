@@ -77,14 +77,14 @@ func main() {
 	}
 
 	// Proceed with port scanning (without repeating CVE info)
-	err := scanner.ScanPorts(subnet, ports)
+	openPorts, err := scanner.ScanPorts(subnet, ports)
 	if err != nil {
 		fmt.Println("Error scanning ports:", err)
 		return
 	}
 
-	// If no errors, report the successful scanning
-	fmt.Println("Port scan completed successfully.")
+	// If no errors, report the successful scanning and display the open ports
+	fmt.Println("Port scan completed successfully. Open ports:", openPorts)
 
 }
 

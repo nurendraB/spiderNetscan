@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
-	"time"
 )
 
 // CVEItem represents a CVE entry in JSON format
@@ -19,6 +17,12 @@ type CVEItem struct {
 
 // CheckOfflineCVE checks for CVE data in the local JSON file
 func CheckOfflineCVE(ports []string, filePath, subnet string) error {
+	// Scan ports to check which are open
+	openPorts, err := ScanPorts(subnet, ports)
+	if err != nil {
+		return fmt.Errorf("failed to scan ports: %w", err)
+	}
+
 	// Read the CVE data from the JSON file
 	data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -28,19 +32,6 @@ func CheckOfflineCVE(ports []string, filePath, subnet string) error {
 	var cveData []CVEItem
 	if err := json.Unmarshal(data, &cveData); err != nil {
 		return fmt.Errorf("failed to parse CVE data: %w", err)
-	}
-
-	// Scan ports to check which are open
-	openPorts := make([]string, 0)
-	for _, port := range ports {
-		address := net.JoinHostPort(subnet, port)
-		_, err := net.DialTimeout("tcp", address, 5*time.Second)
-		if err != nil {
-			fmt.Printf("Port %s is closed or unreachable\n", port)
-		} else {
-			fmt.Printf("Port %s is open\n", port)
-			openPorts = append(openPorts, port)
-		}
 	}
 
 	// Check if the ports are vulnerable based on the CVE data
@@ -77,16 +68,9 @@ func FetchOnlineCVEData(apiKey string, ports []string, subnet string) error {
 	}
 
 	// Scan ports to check which are open
-	openPorts := make([]string, 0)
-	for _, port := range ports {
-		address := net.JoinHostPort(subnet, port)
-		_, err := net.DialTimeout("tcp", address, 5*time.Second)
-		if err != nil {
-			fmt.Printf("Port %s is closed or unreachable\n", port)
-		} else {
-			fmt.Printf("Port %s is open\n", port)
-			openPorts = append(openPorts, port)
-		}
+	openPorts, err := ScanPorts(subnet, ports)
+	if err != nil {
+		return fmt.Errorf("failed to scan ports: %w", err)
 	}
 
 	// Filter and display relevant CVE data for the open ports

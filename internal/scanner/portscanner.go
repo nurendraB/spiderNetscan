@@ -7,7 +7,9 @@ import (
 )
 
 // ScanPorts scans the given subnet and ports for open services
-func ScanPorts(subnet string, ports []string) error {
+func ScanPorts(subnet string, ports []string) ([]string, error) {
+	openPorts := make([]string, 0)
+
 	// Here, you would implement actual port scanning logic, this is just a mock
 	for _, port := range ports {
 		address := net.JoinHostPort(subnet, port)
@@ -16,7 +18,9 @@ func ScanPorts(subnet string, ports []string) error {
 			fmt.Printf("Port %s is closed or unreachable\n", port)
 		} else {
 			fmt.Printf("Port %s is open\n", port)
+			openPorts = append(openPorts, port)
 		}
 	}
-	return nil
+
+	return openPorts, nil
 }
