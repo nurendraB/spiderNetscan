@@ -112,34 +112,27 @@ func updateTool() error {
 		return fmt.Errorf("failed to pull updates: %w", err)
 	}
 
-	// Check if the output contains 'Already up to date'
 	if strings.Contains(string(output), "Already up to date.") {
 		fmt.Println("No new updates available.")
 		return nil
 	}
 
-	// Get latest Git tag as version (fallback to "latest" if no tags exist)
-	cmdTag := exec.Command("git", "describe", "--tags", "--abbrev=0")
-	versionBytes, err := cmdTag.Output()
+	// Get the latest Git tag as version (fallback to "latest" if no tag exists)
+	versionBytes, err := exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
 	version := "latest"
 	if err == nil {
 		version = strings.TrimSpace(string(versionBytes))
-	} else {
-		// Handle the case where no tags exist
-		fmt.Println("Error fetching git tag:", err)
 	}
 
-	fmt.Println("Using version:", version)
-
-	// Rebuild binary with updated version
-	cmdBuild := exec.Command("go", "build", "-ldflags", "-X main.Version="+version, "-o", "spiderNetscan", "cmd/spiderNetscan.go")
+	// Rebuild the binary with updated version
+	cmdBuild := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X main.Version=%s", version), "-o", "spiderNetscan", "cmd/spiderNetscan.go")
 	cmdBuild.Stdout = os.Stdout
 	cmdBuild.Stderr = os.Stderr
 	if err := cmdBuild.Run(); err != nil {
 		return fmt.Errorf("failed to rebuild after update: %w", err)
 	}
 
-	// Move binary to /usr/local/bin (for global use)
+	// Move the binary to /usr/local/bin for global use
 	cmdInstall := exec.Command("sudo", "mv", "spiderNetscan", "/usr/local/bin/")
 	cmdInstall.Stdout = os.Stdout
 	cmdInstall.Stderr = os.Stderr
