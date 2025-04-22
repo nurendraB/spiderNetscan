@@ -1,0 +1,22 @@
+[
+    {
+        "port": "22",
+        "cve": "CVE-2020-14145",
+        "description": "OpenSSH vulnerability in specific versions"
+    },
+    {
+        "port": "80",
+        "cve": "CVE-2021-1234",
+        "description": "HTTP server vulnerable to directory traversal"
+    },
+    {
+        "port": "443",
+        "cve": "CVE-2022-5678",
+        "description": "SSL certificate validation issue"
+    },
+    {
+        "port": "80",
+        "cve": "CVE-2019-11043",
+        "description": "A vulnerability in PHP-FPM affecting many systems"
+    }
+]

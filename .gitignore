@@ -1,0 +1,26 @@
+# Binaries
+/spiderNetscan
+*.exe
+*.out
+*.test
+
+# Go build artifacts
+*.log
+*.tmp
+
+# Dependency directories
+vendor/
+go.sum
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# OS-specific
+Thumbs.db
+
+# Build artifacts from Makefile
+/build/
