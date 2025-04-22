@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
-	"strings"
+	"time"
 )
 
 // CVEItem represents a CVE entry in JSON format
@@ -17,9 +18,9 @@ type CVEItem struct {
 }
 
 // CheckOfflineCVE checks for CVE data in the local JSON file
-func CheckOfflineCVE(ports []string, filePath string) error {
+func CheckOfflineCVE(ports []string, filePath, subnet string) error {
 	// Read the CVE data from the JSON file
-	data, err := os.ReadFile(filePath) // Using os.ReadFile instead of ioutil.ReadFile
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read CVE data: %w", err)
 	}
@@ -29,10 +30,23 @@ func CheckOfflineCVE(ports []string, filePath string) error {
 		return fmt.Errorf("failed to parse CVE data: %w", err)
 	}
 
+	// Scan ports to check which are open
+	openPorts := make([]string, 0)
+	for _, port := range ports {
+		address := net.JoinHostPort(subnet, port)
+		_, err := net.DialTimeout("tcp", address, 5*time.Second)
+		if err != nil {
+			fmt.Printf("Port %s is closed or unreachable\n", port)
+		} else {
+			fmt.Printf("Port %s is open\n", port)
+			openPorts = append(openPorts, port)
+		}
+	}
+
 	// Check if the ports are vulnerable based on the CVE data
 	for _, cve := range cveData {
-		for _, port := range ports {
-			if cve.Port == port {
+		for _, openPort := range openPorts {
+			if cve.Port == openPort {
 				fmt.Printf("CVE ID: %s | Description: %s | Port: %s\n", cve.CVEID, cve.Description, cve.Port)
 			}
 		}
@@ -42,7 +56,7 @@ func CheckOfflineCVE(ports []string, filePath string) error {
 }
 
 // FetchOnlineCVEData fetches CVE data from an online source (like NVD)
-func FetchOnlineCVEData(apiKey string, ports []string) error {
+func FetchOnlineCVEData(apiKey string, ports []string, subnet string) error {
 	// Example of using the NVD API (replace with a real URL)
 	url := fmt.Sprintf("https://api.nvd.nist.gov/vuln/search?apiKey=%s&cpeName=*", apiKey)
 
@@ -52,7 +66,7 @@ func FetchOnlineCVEData(apiKey string, ports []string) error {
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body) // Using io.ReadAll instead of ioutil.ReadAll
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
@@ -62,10 +76,23 @@ func FetchOnlineCVEData(apiKey string, ports []string) error {
 		return fmt.Errorf("failed to parse CVE data: %w", err)
 	}
 
-	// Filter and display relevant CVE data for the given ports
+	// Scan ports to check which are open
+	openPorts := make([]string, 0)
+	for _, port := range ports {
+		address := net.JoinHostPort(subnet, port)
+		_, err := net.DialTimeout("tcp", address, 5*time.Second)
+		if err != nil {
+			fmt.Printf("Port %s is closed or unreachable\n", port)
+		} else {
+			fmt.Printf("Port %s is open\n", port)
+			openPorts = append(openPorts, port)
+		}
+	}
+
+	// Filter and display relevant CVE data for the open ports
 	for _, cve := range cveData {
-		for _, port := range ports {
-			if strings.Contains(cve.Port, port) {
+		for _, openPort := range openPorts {
+			if cve.Port == openPort {
 				fmt.Printf("CVE ID: %s | Description: %s | Port: %s\n", cve.CVEID, cve.Description, cve.Port)
 			}
 		}

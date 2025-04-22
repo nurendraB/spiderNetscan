@@ -62,13 +62,13 @@ func main() {
 				fmt.Println("Error: API key is required for online CVE check.")
 				return
 			}
-			err := scanner.FetchOnlineCVEData(*apiKeyFlag, ports)
+			err := scanner.FetchOnlineCVEData(*apiKeyFlag, ports, subnet)
 			if err != nil {
 				fmt.Println("Error fetching CVE data:", err)
 				return
 			}
 		} else {
-			err := scanner.CheckOfflineCVE(ports, "data/cve_data.json")
+			err := scanner.CheckOfflineCVE(ports, "data/cve_data.json", subnet)
 			if err != nil {
 				fmt.Println("Error checking CVE data:", err)
 				return
