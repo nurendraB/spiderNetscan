@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	Version = "v1.0.1" // Default version, will be replaced during build
+	Version = "dev" // Default version, will be replaced during build
 )
 
 func main() {
@@ -119,7 +119,7 @@ func updateTool() error {
 
 	// Get the latest Git tag as version (fallback to "latest" if no tag exists)
 	versionBytes, err := exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
-	version := "latest"
+	version := "dev" // Default to "dev" if no tags exist
 	if err == nil {
 		version = strings.TrimSpace(string(versionBytes))
 	}
@@ -140,6 +140,8 @@ func updateTool() error {
 		return fmt.Errorf("failed to install updated binary: %w", err)
 	}
 
+	// Update version variable
+	Version = version
 	fmt.Println("Update and rebuild successful!")
 	return nil
 }
