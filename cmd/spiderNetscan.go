@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	Version = "dev" // Default version, will be replaced during build
+	Version = "v1.0.1" // Default version, will be replaced during build
 )
 
 func main() {
