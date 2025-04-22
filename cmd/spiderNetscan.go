@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	Version = "v1.0.1" // Default version, will be replaced during build
+	Version = "dev" // Default version, will be replaced during build
 )
 
 func main() {
@@ -103,11 +103,44 @@ func printBanner() {
 // updateTool updates the tool (can be implemented for git pull or other update logic)
 func updateTool() error {
 	fmt.Println("Updating spiderNetscan tool...")
+
+	// Pull the latest changes
 	cmd := exec.Command("git", "pull")
-	err := cmd.Run()
+	output, err := cmd.CombinedOutput()
+	fmt.Print(string(output))
 	if err != nil {
-		return fmt.Errorf("failed to update the tool: %w", err)
+		return fmt.Errorf("failed to pull updates: %w", err)
 	}
-	fmt.Println("Update successful!")
+
+	// Check if the repository is already up to date
+	if strings.Contains(string(output), "Already up to date.") {
+		fmt.Println("No new updates available.")
+		return nil
+	}
+
+	// Get the latest Git tag as version (fallback to "latest" if not available)
+	versionBytes, err := exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
+	version := "latest"
+	if err == nil {
+		version = strings.TrimSpace(string(versionBytes))
+	}
+
+	// Rebuild the binary with the updated version
+	cmdBuild := exec.Command("go", "build", "-ldflags", "-X", fmt.Sprintf("main.Version=%s", version), "-o", "spiderNetscan", "cmd/spiderNetscan.go")
+	cmdBuild.Stdout = os.Stdout
+	cmdBuild.Stderr = os.Stderr
+	if err := cmdBuild.Run(); err != nil {
+		return fmt.Errorf("failed to rebuild after update: %w", err)
+	}
+
+	// Move the binary to /usr/local/bin (for global use)
+	cmdInstall := exec.Command("sudo", "mv", "spiderNetscan", "/usr/local/bin/")
+	cmdInstall.Stdout = os.Stdout
+	cmdInstall.Stderr = os.Stderr
+	if err := cmdInstall.Run(); err != nil {
+		return fmt.Errorf("failed to install updated binary: %w", err)
+	}
+
+	fmt.Println("Update and rebuild successful!")
 	return nil
 }
