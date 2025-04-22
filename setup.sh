@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Define the version you want to build and install
+VERSION="v1.0.1" 
+
 # Ensure that the script is run from the project root directory
 if [ ! -f go.mod ]; then
   echo "This script must be run from the project root directory!"
@@ -10,9 +13,9 @@ fi
 echo "Installing Go dependencies..."
 go mod tidy
 
-# Build the tool
-echo "Building the tool..."
-make build
+# Build the tool with version injected
+echo "Building the tool (Version: $VERSION)..."
+make build VERSION="$VERSION"
 
 # Check if the build was successful
 if [ $? -eq 0 ]; then

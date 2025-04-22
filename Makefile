@@ -1,9 +1,10 @@
 BINARY_NAME=spiderNetscan
 MAIN_FILE=cmd/spiderNetscan.go
+VERSION=v1.0.1
 
 build:
-	@echo "Building the binary..."
-	go build -o $(BINARY_NAME) $(MAIN_FILE)
+	@echo "Building the binary (Version: $(VERSION))..."
+	go build -ldflags "-X 'main.version=$(VERSION)'" -o $(BINARY_NAME) $(MAIN_FILE)
 
 install: build
 	@echo "Installing $(BINARY_NAME) to /usr/local/bin..."
@@ -19,7 +20,7 @@ update:
 
 help:
 	@echo "Makefile Commands:"
-	@echo "  build    - Build the spiderNetscan tool"
+	@echo "  build    - Build the spiderNetscan tool with version info"
 	@echo "  install  - Install the tool to /usr/local/bin"
 	@echo "  clean    - Remove the built binary"
 	@echo "  update   - Update the tool from GitHub"
