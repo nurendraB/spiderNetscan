@@ -115,54 +115,61 @@ func printBanner() {
 func updateTool() error {
 	fmt.Println("\nUpdating spiderNetscan tool...")
 
-	// Check if git is installed
 	if _, err := exec.LookPath("git"); err != nil {
-		return fmt.Errorf("❌ Git is not installed. Please install Git and try again.")
+		return fmt.Errorf("git is not installed; please install git and try again")
 	}
 
-	// Stash local changes to avoid merge issues
-	exec.Command("git", "stash", "--include-untracked").Run()
+	// Stash local changes
+	stashCmd := exec.Command("git", "stash", "--include-untracked")
+	stashOut, stashErr := stashCmd.CombinedOutput()
+	if stashErr != nil {
+		fmt.Println("warning: failed to stash changes:", string(stashOut))
+	}
 
-	// Pull the latest code from the repo
+	// Pull the latest changes
 	cmd := exec.Command("git", "pull")
 	output, err := cmd.CombinedOutput()
 	fmt.Print(string(output))
 	if err != nil {
-		return fmt.Errorf("❌ Failed to pull updates: %w", err)
+		return fmt.Errorf("failed to pull updates: %w", err)
 	}
 
 	if strings.Contains(string(output), "Already up to date.") {
-		fmt.Println("✅ No new updates available.")
+		fmt.Println("no new updates available")
 		return nil
 	}
 
-	// Get the latest Git tag (version)
+	// Get latest Git tag
 	versionBytes, err := exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
 	version := "latest"
 	if err == nil {
 		version = strings.TrimSpace(string(versionBytes))
 	}
 
-	// Build the updated binary with embedded version
+	// Rebuild the binary
 	cmdBuild := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X main.Version=%s", version), "-o", "spiderNetscan", "cmd/spiderNetscan.go")
 	cmdBuild.Stdout = os.Stdout
 	cmdBuild.Stderr = os.Stderr
 	if err := cmdBuild.Run(); err != nil {
-		return fmt.Errorf("❌ Failed to rebuild after update: %w", err)
+		return fmt.Errorf("failed to rebuild after update: %w", err)
 	}
 
-	// Move the updated binary to /usr/local/bin
+	// Move the binary to /usr/local/bin
 	cmdInstall := exec.Command("sudo", "mv", "spiderNetscan", "/usr/local/bin/")
 	cmdInstall.Stdout = os.Stdout
 	cmdInstall.Stderr = os.Stderr
 	if err := cmdInstall.Run(); err != nil {
-		return fmt.Errorf("❌ Failed to install updated binary: %w", err)
+		return fmt.Errorf("failed to install updated binary: %w", err)
 	}
 
-	// Restore stashed changes if any
-	exec.Command("git", "stash", "pop").Run()
+	// Restore stashed changes
+	popCmd := exec.Command("git", "stash", "pop")
+	popOut, popErr := popCmd.CombinedOutput()
+	if popErr != nil && !strings.Contains(string(popOut), "No stash entries found.") {
+		fmt.Println("warning: failed to restore stashed changes:", string(popOut))
+	}
 
 	Version = version
-	fmt.Printf("✅ spiderNetscan updated to version %s successfully!\n", version)
+	fmt.Printf("✅ spiderNetscan updated to version %s successfully\n", version)
 	return nil
 }
