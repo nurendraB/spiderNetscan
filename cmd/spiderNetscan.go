@@ -113,51 +113,56 @@ func printBanner() {
 
 // updateTool updates the tool (can be implemented for git pull or other update logic)
 func updateTool() error {
-	fmt.Println("Updating spiderNetscan tool...")
+	fmt.Println("\nUpdating spiderNetscan tool...")
 
 	// Check if git is installed
 	if _, err := exec.LookPath("git"); err != nil {
-		return fmt.Errorf("git is not installed, please install git and try again")
+		return fmt.Errorf("❌ Git is not installed. Please install Git and try again.")
 	}
 
-	// Pull the latest code
+	// Stash local changes to avoid merge issues
+	exec.Command("git", "stash", "--include-untracked").Run()
+
+	// Pull the latest code from the repo
 	cmd := exec.Command("git", "pull")
 	output, err := cmd.CombinedOutput()
 	fmt.Print(string(output))
 	if err != nil {
-		return fmt.Errorf("failed to pull updates: %w", err)
+		return fmt.Errorf("❌ Failed to pull updates: %w", err)
 	}
 
 	if strings.Contains(string(output), "Already up to date.") {
-		fmt.Println("No new updates available.")
+		fmt.Println("✅ No new updates available.")
 		return nil
 	}
 
-	// Get the latest Git tag as version (fallback to "latest" if no tag exists)
+	// Get the latest Git tag (version)
 	versionBytes, err := exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
-	version := "latest" // Default to "latest" if no tags exist
+	version := "latest"
 	if err == nil {
 		version = strings.TrimSpace(string(versionBytes))
 	}
 
-	// Rebuild the binary with the updated version
+	// Build the updated binary with embedded version
 	cmdBuild := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X main.Version=%s", version), "-o", "spiderNetscan", "cmd/spiderNetscan.go")
 	cmdBuild.Stdout = os.Stdout
 	cmdBuild.Stderr = os.Stderr
 	if err := cmdBuild.Run(); err != nil {
-		return fmt.Errorf("failed to rebuild after update: %w", err)
+		return fmt.Errorf("❌ Failed to rebuild after update: %w", err)
 	}
 
-	// Move the binary to /usr/local/bin for global use
+	// Move the updated binary to /usr/local/bin
 	cmdInstall := exec.Command("sudo", "mv", "spiderNetscan", "/usr/local/bin/")
 	cmdInstall.Stdout = os.Stdout
 	cmdInstall.Stderr = os.Stderr
 	if err := cmdInstall.Run(); err != nil {
-		return fmt.Errorf("failed to install updated binary: %w", err)
+		return fmt.Errorf("❌ Failed to install updated binary: %w", err)
 	}
 
-	// Update version variable
+	// Restore stashed changes if any
+	exec.Command("git", "stash", "pop").Run()
+
 	Version = version
-	fmt.Println("Update and rebuild successful!")
+	fmt.Printf("✅ spiderNetscan updated to version %s successfully!\n", version)
 	return nil
 }
