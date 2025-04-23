@@ -27,6 +27,7 @@ fi
 
 # Move the binary to /usr/local/bin for global access
 echo "Installing spiderNetscan..."
+go build -ldflags "-X main.Version=v1.0.2" -o spiderNetscan cmd/spiderNetscan.go
 sudo mv spiderNetscan /usr/local/bin/
 
 # Confirm installation
